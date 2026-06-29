@@ -8,6 +8,7 @@ import { Audience } from "@/components/marketing/audience";
 import { Benefits } from "@/components/marketing/benefits";
 import { CurriculumPreview } from "@/components/marketing/curriculum-preview";
 import { Bonus } from "@/components/marketing/bonus";
+import { Instructor } from "@/components/marketing/instructor";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { Pricing } from "@/components/marketing/pricing";
 import { Faq } from "@/components/marketing/faq";
@@ -32,6 +33,7 @@ export default async function Home({
         <Benefits />
         <CurriculumPreview />
         <Bonus />
+        <Instructor />
         <Testimonials />
         <Pricing />
         <Faq />
