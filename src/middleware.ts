@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 import { isAdminEmail } from "@/lib/admin-access";
+import { isFreeLessonPath } from "@/lib/preview";
 
 /** Các route yêu cầu đăng nhập. */
 const PROTECTED = [
@@ -41,7 +42,10 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isProtected = PROTECTED.some((p) => path === p || path.startsWith(`${p}/`));
+  // Ngày học thử miễn phí (vd /lesson/1) không cần đăng nhập.
+  const isProtected =
+    PROTECTED.some((p) => path === p || path.startsWith(`${p}/`)) &&
+    !isFreeLessonPath(path);
 
   if (isProtected && !user) {
     const redirectUrl = request.nextUrl.clone();
