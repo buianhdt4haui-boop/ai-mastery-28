@@ -52,6 +52,28 @@ async function fetchRemoteOrders(): Promise<Order[] | null> {
   }));
 }
 
+export interface LeadRow {
+  email: string;
+  persona_id: string | null;
+  recommended_plan: string | null;
+  created_at: string;
+}
+
+/** Đọc email lead từ Supabase qua service role. */
+async function fetchRemoteLeads(): Promise<LeadRow[] | null> {
+  if (!isAdminConfigured) return null;
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("leads")
+    .select("email,persona_id,recommended_plan,created_at")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("[admin] fetch leads failed", error.message);
+    return [];
+  }
+  return data as LeadRow[];
+}
+
 export default async function AdminPage() {
   // Chặn truy cập nếu không phải admin (chỉ khi đã bật Supabase).
   if (isSupabaseConfigured) {
@@ -59,7 +81,10 @@ export default async function AdminPage() {
     if (!isAdminEmail(user?.email)) redirect("/dashboard");
   }
 
-  const remoteOrders = await fetchRemoteOrders();
+  const [remoteOrders, remoteLeads] = await Promise.all([
+    fetchRemoteOrders(),
+    fetchRemoteLeads(),
+  ]);
 
   return (
     <>
@@ -77,7 +102,7 @@ export default async function AdminPage() {
         </Container>
       </header>
       <main className="flex-1">
-        <AdminClient remoteOrders={remoteOrders} />
+        <AdminClient remoteOrders={remoteOrders} remoteLeads={remoteLeads} />
       </main>
       <SiteFooter />
     </>

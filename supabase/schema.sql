@@ -61,6 +61,17 @@ create table if not exists public.lesson_progress (
   primary key (user_id, day)
 );
 
+-- Lead thu từ trang kết quả quiz (email marketing)
+create table if not exists public.leads (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  persona_id text,
+  recommended_plan text,
+  answers jsonb,
+  source text default 'quiz_result',
+  created_at timestamptz not null default now()
+);
+
 -- Chứng nhận
 create table if not exists public.certificates (
   id uuid primary key default gen_random_uuid(),
@@ -77,6 +88,8 @@ alter table public.orders enable row level security;
 alter table public.enrollments enable row level security;
 alter table public.lesson_progress enable row level security;
 alter table public.certificates enable row level security;
+-- leads: bật RLS, không policy công khai -> chỉ service role truy cập.
+alter table public.leads enable row level security;
 
 -- Mỗi người chỉ đọc/ghi dữ liệu của chính mình
 create policy "own profile" on public.profiles

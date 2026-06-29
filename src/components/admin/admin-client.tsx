@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  Mail,
 } from "lucide-react";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { curriculum } from "@/data/curriculum";
 import { formatVnd } from "@/data/pricing";
 import { formatDateVi } from "@/lib/format";
+import { getPersona } from "@/data/personas";
 import { useStore } from "@/lib/use-store";
 import { getOrders, updateOrderStatus } from "@/lib/progress";
 import type { Order, OrderStatus } from "@/types";
+
+export interface AdminLead {
+  email: string;
+  persona_id: string | null;
+  recommended_plan: string | null;
+  created_at: string;
+}
 
 const statusMeta: Record<OrderStatus, { label: string; className: string }> = {
   paid: { label: "Đã thanh toán", className: "bg-primary/15 text-primary" },
@@ -30,13 +39,17 @@ const statusMeta: Record<OrderStatus, { label: string; className: string }> = {
 
 export function AdminClient({
   remoteOrders = null,
+  remoteLeads = null,
 }: {
   /** Đơn hàng đọc từ Supabase (service role). Khi có, hiển thị read-only. */
   remoteOrders?: Order[] | null;
+  /** Email lead đọc từ Supabase (service role). */
+  remoteLeads?: AdminLead[] | null;
 }) {
   const localOrders = useStore(getOrders, [] as Order[]);
   const orders = remoteOrders ?? localOrders;
   const readOnly = remoteOrders !== null;
+  const leads = remoteLeads ?? [];
 
   const paidOrders = orders.filter((o) => o.status === "paid");
   const revenue = paidOrders.reduce((sum, o) => sum + o.amount, 0);
@@ -46,6 +59,7 @@ export function AdminClient({
     { icon: Banknote, label: "Doanh thu (đã TT)", value: formatVnd(revenue) },
     { icon: ShoppingCart, label: "Đơn hàng", value: String(orders.length) },
     { icon: Users, label: "Học viên", value: String(students.size) },
+    { icon: Mail, label: "Email lead", value: String(leads.length) },
     { icon: BookOpen, label: "Bài học", value: String(curriculum.length) },
   ];
 
@@ -57,7 +71,7 @@ export function AdminClient({
       </p>
 
       {/* Stats */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((s) => (
           <Card key={s.label} className="border-white/10 bg-card/60">
             <CardContent className="flex items-center gap-4 p-5">
@@ -78,6 +92,7 @@ export function AdminClient({
         <TabsList>
           <TabsTrigger value="orders">Đơn hàng</TabsTrigger>
           <TabsTrigger value="students">Học viên</TabsTrigger>
+          <TabsTrigger value="leads">Email lead</TabsTrigger>
           <TabsTrigger value="lessons">Bài học</TabsTrigger>
         </TabsList>
 
@@ -183,6 +198,38 @@ export function AdminClient({
                       <Td>{s.email}</Td>
                       <Td>{s.phone}</Td>
                       <Td className="capitalize">{s.planId}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Leads */}
+        <TabsContent value="leads" className="mt-6">
+          {leads.length === 0 ? (
+            <EmptyState text="Chưa có email lead nào. Lead được thu ở trang kết quả quiz." />
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-white/10">
+              <table className="w-full text-sm">
+                <thead className="bg-card/60 text-left text-muted-foreground">
+                  <tr>
+                    <Th>Email</Th>
+                    <Th>Hồ sơ</Th>
+                    <Th>Gói gợi ý</Th>
+                    <Th>Ngày</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.map((l) => (
+                    <tr key={l.email} className="border-t border-white/10">
+                      <Td className="font-medium">{l.email}</Td>
+                      <Td>{getPersona(l.persona_id ?? "")?.title ?? "—"}</Td>
+                      <Td className="capitalize">{l.recommended_plan ?? "—"}</Td>
+                      <Td className="whitespace-nowrap">
+                        {formatDateVi(l.created_at)}
+                      </Td>
                     </tr>
                   ))}
                 </tbody>

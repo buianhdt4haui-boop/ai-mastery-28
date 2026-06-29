@@ -10,6 +10,7 @@ import { useHydrated } from "@/lib/use-store";
 import { getPersona } from "@/data/personas";
 import { getPlan, formatVnd } from "@/data/pricing";
 import { siteConfig } from "@/lib/site";
+import { EmailCapture } from "./email-capture";
 
 export function ResultClient() {
   const hydrated = useHydrated();
@@ -65,6 +66,12 @@ export function ResultClient() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Thu email lead */}
+      <EmailCapture
+        personaId={result.personaId}
+        recommendedPlan={result.recommendedPlan}
+      />
 
       {/* Path + focus + pace */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
