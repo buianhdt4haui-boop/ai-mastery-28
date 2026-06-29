@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ export function AuthForm({
   const [state, formAction, pending] = useActionState(action, initial);
 
   const isLogin = mode === "login";
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="mx-auto w-full max-w-sm">
@@ -65,14 +66,30 @@ export function AuthForm({
 
         <div className="grid gap-2">
           <Label htmlFor="password">Mật khẩu</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder={isLogin ? "Mật khẩu" : "Tối thiểu 6 ký tự"}
-            autoComplete={isLogin ? "current-password" : "new-password"}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder={isLogin ? "Mật khẩu" : "Tối thiểu 6 ký tự"}
+              autoComplete={isLogin ? "current-password" : "new-password"}
+              className="pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {state.error && (
