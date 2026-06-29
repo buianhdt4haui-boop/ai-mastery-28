@@ -17,6 +17,10 @@ export function SiteFooter() {
             </div>
             <p className="text-sm text-muted-foreground">{siteConfig.tagline}</p>
             <p className="text-sm text-muted-foreground">
+              Phát triển bởi{" "}
+              <span className="font-medium text-foreground">ROAS Lab Ads Academy</span>
+            </p>
+            <p className="text-sm text-muted-foreground">
               Liên hệ:{" "}
               <a
                 href={`mailto:${siteConfig.contactEmail}`}
